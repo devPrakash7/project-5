@@ -1,6 +1,0 @@
-
-
-const isValid = function (value) {
-
-    
-}
