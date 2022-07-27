@@ -1,6 +1,6 @@
 const express = require('express')
 const {createUser, loginUser, getUser , updateUserProfile} = require('../controller/userController')
-const {createProduct} = require('../controller/productController')
+const {createProduct,getProducts, getProductById, deleteproductsById} = require('../controller/productController')
 const {authentication, authorization} = require('../middleware/auth')
 const router = express.Router()
 
@@ -14,6 +14,8 @@ router.put('/user/:userId/profile', authentication , authorization , updateUserP
 
 router.post('/products', createProduct)
 router.get ('/products' , getProducts)
+router.get('/products/:productId', getProductById);
+router.delete('/products/:productId', deleteproductsById)
 
 //Validating the endpoint
 router.all("/*", function (req, res) {

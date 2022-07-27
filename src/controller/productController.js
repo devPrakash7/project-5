@@ -195,4 +195,52 @@ const getProducts = async function (req, res) {
     return res.status(400).send({ status: false, message: err.message });
   }
 };
-module.exports = { createProduct };
+
+
+const getProductById = async function(req, res) {
+  try {
+      const productId = req.params.productId
+      
+      if (!isValidId(productId)) {
+          return res.status(400).send({ status: false, message: 'product id is invalid' })
+      }
+      const product = await productModel.findOne({_id:productId,isDeleted:false})
+      if (!product) {
+          return res.status(404).send({ status: false, message: 'product not found' })
+      }
+      return res.status(200).send({ status: true, data: product })
+  } catch (error) {
+      return res.status(500).send({ message: 'error', error: error.message })
+  }
+}
+
+
+
+
+const deleteproductsById = async function(req, res) {
+
+  try {
+      let productId = req.params.productId
+    
+
+      if (!isValidId(productId)) {
+          return res.status(400).send({ status: false, message: "Invalid Product-Id" });
+      }
+
+      let checkProduct = await productModel.findOne({ _id: productId, isDeleted: false })
+
+      if (!checkProduct) {
+          return res.status(404).send({ status: false, message: 'Product not found' })
+      }
+
+      let updateProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, { isDeleted: true, deletedAt: Date.now() }, { new: true })
+
+      res.status(200).send({ status: true, message: 'Product sucessfully deleted', data: updateProduct })
+
+  } catch (error) {
+      res.status(500).send({ status: false, error: error.message });
+  }
+}
+
+
+module.exports = { createProduct,getProducts, getProductById, deleteproductsById};
