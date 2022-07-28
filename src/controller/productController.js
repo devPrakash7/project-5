@@ -186,15 +186,56 @@ const createProduct = async function (req, res) {
     return res.status(500).send({ status: false, message: err.message });
   }
 };
-
 const getProducts = async function (req, res) {
   try {
-    let { size, name, priceGreaterThan, priceLessThan } = req.query;
-    
+    let { size, name, priceGreaterThan, priceLessThan, priceSort } = req.query;
+    let searchCondition = { isDeleted: false };
+
+    if (size) {
+      if (!isValidSize(size)) {
+        return res
+          .status(400)
+          .send({ status: false, message: "Enter valid size " });
+      }
+      size = size.split(",").map((x) => x.trim());
+      searchCondition.availableSizes = { $all: size };
+    }
+
+    if (name) {
+      if (!isValidString(name) || !isValidTitle(name)) {
+        return res
+          .status(400)
+          .send({ status: false, message: "Enter valid name" });
+      }
+      searchCondition.title = { $regex: name };
+    }
+
+    if (priceGreaterThan && priceLessThan) {
+      searchCondition.price = { $gt: priceGreaterThan, $lt: priceLessThan };
+    } else {
+      if (priceGreaterThan) {
+        searchCondition.price = { $gt: priceGreaterThan };
+      } else if (priceLessThan) {
+        searchCondition.price = { $lt: priceLessThan };
+      }
+    }
+
+    let getProduct = await productModel
+      .find(searchCondition)
+      .sort({ price: priceSort });
+
+    //Validating if there any wrong value given by user
+    if (getProduct.length == 0) {
+      return res.status(404).send({ status: false, message: "No data found" });
+    }
+    res
+      .status(200)
+      .send({ status: true, message: "success", data: getProduct });
   } catch (err) {
-    return res.status(400).send({ status: false, message: err.message });
+    return res.status(500).send({ status: false, message: err.message });
   }
 };
+
 
 
 const getProductById = async function(req, res) {
