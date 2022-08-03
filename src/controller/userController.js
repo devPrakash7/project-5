@@ -1,14 +1,6 @@
 const userModel = require("../models/userModel");
 const {
-  isValidRequest,
-  isValidString,
-  isValidName,
-  isValidMail,
-  isValidPhone,
-  isValidPassword,
-  isValidPincode,
-  isValidId,
-} = require("../validator/validation");
+  isValidRequest,isValidString,isValidName,isValidMail,isValidPhone,isValidPassword,isValidPincode,isValidId,} = require("../validator/validation");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { uploadFiles } = require("../upload/upload");
@@ -16,20 +8,16 @@ const mongoose = require("mongoose");
 
 const createUser = async function (req, res) {
   try {
-    if (!isValidRequest(req.body)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Enter valid Input" });
-    }
     let { fname, lname, email, phone, password, address } = req.body;
     let userData = {};
     let profileImage = req.files;
-    if (!fname) {
-      return res
-        .status(400)
-        .send({ status: false, message: "First Name is required" });
+    if (!isValidRequest(req.body)) {
+      return res.status(400).send({ status: false, message: "Enter valid Input" });
     }
-    fname = fname.trim();
+    if (!fname) {
+      return res.status(400).send({ status: false, message: "First Name is required" });
+    }
+   
     if (!isValidString(fname) || !isValidName(fname)) {
       return res
         .status(400)
@@ -42,7 +30,7 @@ const createUser = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Last Name is required" });
     }
-    lname = lname.trim();
+    
     if (!isValidString(lname) || !isValidName(lname)) {
       return res
         .status(400)
@@ -55,7 +43,7 @@ const createUser = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Email is required" });
     }
-    email = email.trim();
+    
     if (!isValidString(email) || !isValidMail(email)) {
       return res
         .status(400)
@@ -71,16 +59,12 @@ const createUser = async function (req, res) {
 
     //Profile Image validation
     if (profileImage.length > 0) {
-      console.log(profileImage[0]);
       let match = /\.(jpeg|png|jpg)$/.test(profileImage[0].originalname);
       if (match == false) {
-        return res.status(400).send({
-          status: false,
-          message: "Profile Image is required in JPEG/PNG/JPG format",
+        return res.status(400).send({  status: false,  message: "Profile Image is required in JPEG/PNG/JPG format",
         });
       }
       let uploadedFileURL = await uploadFiles(profileImage[0]);
-      console.log(uploadedFileURL);
       userData.profileImage = uploadedFileURL;
     } else {
       return res
@@ -94,7 +78,7 @@ const createUser = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Phone number is required" });
     }
-    if (!isValidString(phone) || !isValidPhone(phone)) {
+    if ( !isValidPhone(phone)) {
       return res
         .status(400)
         .send({ status: false, message: "Enter phone in valid format" });
@@ -310,7 +294,7 @@ const loginUser = async function (req, res) {
         .status(400)
         .send({ status: false, message: "email is required" });
     }
-    if (!isValidMail(email)) {
+    if (!isValidString(email) || !isValidMail(email)) {
       return res
         .status(400)
         .send({ status: false, message: "Entered mail ID is not valid" });
@@ -381,7 +365,7 @@ const getUser = async function (req, res) {
 const updateUserProfile = async function (req, res) {
   try {
     //validating the requset body
-    if (!isValidRequest(req.body)) {
+    if (!isValidValue(req.body)) {
       return res
         .status(400)
         .send({ status: false, message: "Enter valid input" });
